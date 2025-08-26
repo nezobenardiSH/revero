@@ -1,15 +1,5 @@
 {
   "pages": {
-    "/api/availability/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/availability/route.js"
-    ],
-    "/api/reservations/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/reservations/route.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -21,15 +11,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/[subdomain]/page.js"
     ],
-    "/page": [
+    "/api/reservations/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/api/reservations/route.js"
     ],
-    "/_not-found/page": [
+    "/[subdomain]/book/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/[subdomain]/book/page.js"
     ]
   }
 }

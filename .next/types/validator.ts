@@ -47,10 +47,22 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 }
 
 
+// Validate ../../app/[subdomain]/book/page.tsx
+{
+  const handler = {} as typeof import("../../app/[subdomain]/book/page.js")
+  handler satisfies AppPageConfig<"/[subdomain]/book">
+}
+
 // Validate ../../app/[subdomain]/page.tsx
 {
   const handler = {} as typeof import("../../app/[subdomain]/page.js")
   handler satisfies AppPageConfig<"/[subdomain]">
+}
+
+// Validate ../../app/[subdomain]/reservation/[id]/page.tsx
+{
+  const handler = {} as typeof import("../../app/[subdomain]/reservation/[id]/page.js")
+  handler satisfies AppPageConfig<"/[subdomain]/reservation/[id]">
 }
 
 // Validate ../../app/page.tsx
@@ -63,6 +75,12 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   const handler = {} as typeof import("../../app/api/availability/route.js")
   handler satisfies RouteHandlerConfig<"/api/availability">
+}
+
+// Validate ../../app/api/reservations/[id]/route.ts
+{
+  const handler = {} as typeof import("../../app/api/reservations/[id]/route.js")
+  handler satisfies RouteHandlerConfig<"/api/reservations/[id]">
 }
 
 // Validate ../../app/api/reservations/route.ts

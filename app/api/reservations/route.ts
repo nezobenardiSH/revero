@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { restaurantId, tableId, date, time, partySize, guestName, guestEmail } = body;
+    const { restaurantId, tableId, date, time, partySize, guestName, guestEmail, rescheduleId } = body;
 
     if (!restaurantId || !tableId || !date || !time || !partySize || !guestName || !guestEmail) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -13,6 +13,14 @@ export async function POST(request: NextRequest) {
     const validationError = validateBookingTime(date, time);
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+
+    // If this is a reschedule, cancel the original reservation
+    if (rescheduleId) {
+      await prisma.reservation.update({
+        where: { id: parseInt(rescheduleId) },
+        data: { status: 'cancelled' }
+      });
     }
 
     const reservation = await createReservation(restaurantId, tableId, date, time, partySize, guestName, guestEmail);
