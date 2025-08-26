@@ -1,4 +1,6 @@
 {
-  "/api/reservations/route": "app/api/reservations/route.js",
-  "/api/availability/route": "app/api/availability/route.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/availability/route": "app/api/availability/route.js",
+  "/[subdomain]/page": "app/[subdomain]/page.js",
+  "/page": "app/page.js"
 }
