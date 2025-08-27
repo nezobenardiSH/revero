@@ -48,6 +48,7 @@ export default function BookingFormNew({ onReservationSubmit, isLoading }: Booki
   const [floorNumber, setFloorNumber] = useState<number>(1)
   const [showTableModal, setShowTableModal] = useState(false)
   const [selectedTableDetails, setSelectedTableDetails] = useState<TableDetails | null>(null)
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('map')
 
   const handleInputChange = (field: keyof BookingFormData, value: any) => {
     setFormData({ ...formData, [field]: value })
@@ -406,152 +407,233 @@ export default function BookingFormNew({ onReservationSubmit, isLoading }: Booki
           <div className="h-full flex flex-col">
             <label className="block text-sm text-gray-600 mb-2">Choose table</label>
             
-            {/* Floor selector */}
-            <div className="flex gap-2 mb-4">
-              {[1, 2, 3, 4].map(floor => (
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+              {/* Floor selector */}
+              <div className="flex gap-2 mb-4 md:mb-0">
+                {[1, 2, 3, 4].map(floor => (
+                  <button
+                    key={floor}
+                    onClick={() => setFloorNumber(floor)}
+                    className={`px-4 py-2 rounded-md ${
+                      floorNumber === floor 
+                        ? 'bg-gray-200 text-gray-900' 
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {floor === 1 ? '1st' : floor === 2 ? '2nd' : floor === 3 ? '3rd' : '4th'} floor
+                  </button>
+                ))}
+                <button className="px-4 py-2 rounded-md bg-gray-50 text-gray-600 hover:bg-gray-100">
+                  Rooftop
+                </button>
+              </div>
+
+              {/* View Mode Toggle */}
+              <div className="flex gap-2">
                 <button
-                  key={floor}
-                  onClick={() => setFloorNumber(floor)}
+                  onClick={() => setViewMode('map')}
                   className={`px-4 py-2 rounded-md ${
-                    floorNumber === floor 
+                    viewMode === 'map' 
                       ? 'bg-gray-200 text-gray-900' 
                       : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  {floor === 1 ? '1st' : floor === 2 ? '2nd' : floor === 3 ? '3rd' : '4th'} floor
+                  Map View
                 </button>
-              ))}
-              <button className="px-4 py-2 rounded-md bg-gray-50 text-gray-600 hover:bg-gray-100">
-                Rooftop
-              </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-4 py-2 rounded-md ${
+                    viewMode === 'list' 
+                      ? 'bg-gray-200 text-gray-900' 
+                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  List View
+                </button>
+              </div>
             </div>
 
             {/* Floor Plan */}
-            <div className="border border-gray-200 rounded-lg bg-gray-50 relative flex-1" style={{ minHeight: '800px' }}>
-              <div className="p-4 h-full flex flex-col">
-                <div className="relative w-full flex-1">
-                  {tables[floorNumber]?.map((table) => (
-                    <button
-                      key={table.id}
-                      onClick={() => handleTableClick(table)}
-                      className={`absolute transform -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 transition-all ${
-                        formData.tableId === table.id
-                          ? 'bg-orange-500 border-orange-600 text-white'
-                          : 'bg-white border-gray-300 hover:border-orange-400'
-                      } ${table.large ? 'w-16 h-16' : 'w-12 h-12'}`}
-                      style={{ 
-                        left: `${table.x}%`, 
-                        top: `${table.y}%`
-                      }}
-                    >
-                      <div className="text-xs font-semibold">{table.seats}</div>
-                    </button>
-                  ))}
+            {viewMode === 'map' ? (
+              <div className="border border-gray-200 rounded-lg bg-gray-50 relative flex-1" style={{ minHeight: '800px' }}>
+                <div className="p-4 h-full flex flex-col">
+                  <div className="relative w-full flex-1">
+                    {tables[floorNumber]?.map((table) => (
+                      <button
+                        key={table.id}
+                        onClick={() => handleTableClick(table)}
+                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 transition-all ${
+                          formData.tableId === table.id
+                            ? 'bg-orange-500 border-orange-600 text-white'
+                            : 'bg-white border-gray-300 hover:border-orange-400'
+                        } ${table.large ? 'w-16 h-16' : 'w-12 h-12'}`}
+                        style={{ 
+                          left: `${table.x}%`, 
+                          top: `${table.y}%`
+                        }}
+                      >
+                        <div className="text-xs font-semibold">{table.seats}</div>
+                      </button>
+                    ))}
+                    
+                    {/* Table with checkmark (selected) */}
+                    {formData.tableId && tables[floorNumber]?.find(t => t.id === formData.tableId) && (
+                      <div
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                        style={{ 
+                          left: `${tables[floorNumber].find(t => t.id === formData.tableId)!.x}%`, 
+                          top: `${tables[floorNumber].find(t => t.id === formData.tableId)!.y}%`
+                        }}
+                      >
+                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                   
-                  {/* Table with checkmark (selected) */}
-                  {formData.tableId && tables[floorNumber]?.find(t => t.id === formData.tableId) && (
-                    <div
-                      className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                      style={{ 
-                        left: `${tables[floorNumber].find(t => t.id === formData.tableId)!.x}%`, 
-                        top: `${tables[floorNumber].find(t => t.id === formData.tableId)!.y}%`
-                      }}
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-gray-600">
+                      {formData.tableId 
+                        ? `Selected: ${tables[floorNumber]?.find(t => t.id === formData.tableId)?.name}`
+                        : 'Click a table to view details'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="border border-gray-200 rounded-lg bg-gray-50 p-4 flex-1" style={{ minHeight: '800px' }}>
+                <h3 className="text-lg font-bold mb-4">Tables on Floor {floorNumber}</h3>
+                <ul className="space-y-4">
+                  {tables[floorNumber]?.map(table => (
+                    <li 
+                      key={table.id} 
+                      className={`flex flex-col md:flex-row items-center justify-between p-4 bg-white rounded-lg shadow-md border-2 ${
+                        formData.tableId === table.id 
+                          ? 'border-orange-500' 
+                          : 'border-gray-200 hover:border-orange-300'
+                      }`}
                     >
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  )}
-
-                  {/* Table Details Modal - Inside Floor Plan */}
-                  {showTableModal && selectedTableDetails && (
-                    <div className="absolute inset-0 flex items-center justify-center z-10 bg-black bg-opacity-50">
-                      <div className="bg-white rounded-lg shadow-xl border border-gray-300 w-80 max-w-sm overflow-hidden">
-                        <div className="flex flex-col">
-                        {/* Top - Image */}
-                        <div className="h-48 relative">
-                          <img 
-                            src={selectedTableDetails.image} 
-                            alt={selectedTableDetails.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            onClick={() => setShowTableModal(false)}
-                            className="absolute top-2 right-2 text-white hover:text-gray-300 p-1 bg-black bg-opacity-50 rounded-full"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                        
-                        {/* Bottom - Details */}
-                        <div className="p-4 flex flex-col">
-                          <div className="mb-3">
-                            <h3 className="text-lg font-bold">Table {selectedTableDetails.id}</h3>
-                            <p className="text-sm text-gray-600">{selectedTableDetails.description}</p>
-                          </div>
-                          
-                          <div className="flex items-center gap-3 text-xs text-gray-700 mb-3">
-                            <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-4 w-full md:w-auto mb-3 md:mb-0">
+                        <img 
+                          src={table.image} 
+                          alt={table.name} 
+                          className="w-24 h-24 object-cover rounded-md flex-shrink-0"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-bold text-lg">Table {table.id}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{table.description}</p>
+                          <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-700">
+                            <span className="flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                               </svg>
-                              <span>Seats {selectedTableDetails.seats}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
+                              <span>{table.seats} Seats</span>
+                            </span>
+                            <span className="flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
                               <span>Floor {floorNumber}</span>
-                            </div>
+                            </span>
                           </div>
-
-                          <div className="flex flex-wrap gap-1 mb-4 flex-1">
-                            {selectedTableDetails.features.slice(0, 2).map((feature, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs"
-                              >
-                                {feature}
-                              </span>
-                            ))}
-                          </div>
-
-                          <div className="flex gap-2 mt-4">
-                            <button
-                              onClick={() => setShowTableModal(false)}
-                              className="flex-1 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
-                            >
-                              Back
-                            </button>
-                            <button
-                              onClick={selectTable}
-                              className="flex-1 py-2 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600"
-                            >
-                              Select
-                            </button>
-                          </div>
-                        </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="text-center mt-4">
-                  <p className="text-sm text-gray-600">
-                    {formData.tableId 
-                      ? `Selected: ${tables[floorNumber]?.find(t => t.id === formData.tableId)?.name}`
-                      : 'Click a table to view details'}
-                  </p>
-                </div>
+                      <button
+                        onClick={() => handleTableClick(table)}
+                        className={`mt-3 md:mt-0 px-6 py-2 rounded-md font-medium transition-colors w-full md:w-auto ${
+                          formData.tableId === table.id
+                            ? 'bg-orange-500 text-white hover:bg-orange-600'
+                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        }`}
+                      >
+                        {formData.tableId === table.id ? 'Selected' : 'Select'}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Table Details Modal - Outside Floor Plan - This needs to be outside the conditional rendering */}
+      {showTableModal && selectedTableDetails && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl border border-gray-300 w-full max-w-sm overflow-hidden">
+            <div className="flex flex-col">
+            {/* Top - Image */}
+            <div className="h-48 relative">
+              <img 
+                src={selectedTableDetails.image} 
+                alt={selectedTableDetails.name}
+                className="w-full h-full object-cover"
+              />
+              <button
+                onClick={() => setShowTableModal(false)}
+                className="absolute top-2 right-2 text-white hover:text-gray-300 p-1 bg-black bg-opacity-50 rounded-full"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Bottom - Details */}
+            <div className="p-4 flex flex-col">
+              <div className="mb-3">
+                <h3 className="text-lg font-bold">Table {selectedTableDetails.id}</h3>
+                <p className="text-sm text-gray-600">{selectedTableDetails.description}</p>
+              </div>
+              
+              <div className="flex items-center gap-3 text-xs text-gray-700 mb-3">
+                <div className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span>Seats {selectedTableDetails.seats}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Floor {floorNumber}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-1 mb-4 flex-1">
+                {selectedTableDetails.features.slice(0, 2).map((feature, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs"
+                  >
+                    {feature}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => setShowTableModal(false)}
+                  className="flex-1 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={selectTable}
+                  className="flex-1 py-2 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600"
+                >
+                  Select
+                </button>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Actions */}
       <div className="flex justify-between items-center mt-8 pt-6 border-t">

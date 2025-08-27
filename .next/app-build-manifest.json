@@ -11,15 +11,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/[subdomain]/page.js"
     ],
+    "/[subdomain]/book/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[subdomain]/book/page.js"
+    ],
     "/api/reservations/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/reservations/route.js"
     ],
-    "/[subdomain]/book/page": [
+    "/[subdomain]/reservation/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/[subdomain]/book/page.js"
+      "static/chunks/app/[subdomain]/reservation/[id]/page.js"
+    ],
+    "/api/reservations/[id]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/reservations/[id]/route.js"
     ]
   }
 }

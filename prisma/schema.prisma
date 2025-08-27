@@ -39,6 +39,12 @@ model Table {
   @@unique([restaurantId, number])
 }
 
+// enum ReservationStatus {
+//   confirmed
+//   cancelled
+//   rescheduled
+// }
+
 model Reservation {
   id           Int        @id @default(autoincrement())
   restaurantId Int
@@ -48,6 +54,7 @@ model Reservation {
   partySize    Int
   guestName    String
   guestEmail   String
+  status       String @default("confirmed")
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   table        Table      @relation(fields: [tableId], references: [id])
   createdAt    DateTime   @default(now())

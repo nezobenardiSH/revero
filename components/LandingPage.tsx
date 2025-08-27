@@ -24,7 +24,7 @@ export default function LandingPage({ restaurantName }: LandingPageProps) {
   }
 
   const handleNewReservation = () => {
-    router.push(`/${restaurantName}/book`)
+    router.push(`/book`)
   }
 
   return (

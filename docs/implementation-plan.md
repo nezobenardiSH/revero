@@ -36,7 +36,7 @@ npm run dev
 # Expected output: Next.js dev server starts on localhost:3001 (3000 was in use)
 
 # Test command 2  
-curl http://localhost:3001
+curl http://localhost:3000
 # Expected output: Default Next.js page loads
 ```
 

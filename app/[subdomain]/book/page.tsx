@@ -74,94 +74,26 @@ export default function BookPage({
 
       const result = await response.json()
       
-      setConfirmation({
-        id: result.reservation.id,
-        restaurantName: restaurant.name,
-        tableName: `Table ${bookingData.tableId}`,
-        date: bookingData.date,
-        time: bookingData.time,
-        partySize: bookingData.partySize,
-        guestName: bookingData.name,
-      })
+      // setConfirmation({
+      //   id: result.reservation.id,
+      //   restaurantName: restaurant.name,
+      //   tableName: `Table ${bookingData.tableId}`,
+      //   date: bookingData.date,
+      //   time: bookingData.time,
+      //   partySize: bookingData.partySize,
+      //   guestName: bookingData.name,
+      // })
+
+      router.push(`/reservation/${result.reservation.id}`)
+
+      setIsCreatingReservation(false)
+
     } catch (error) {
       console.error('Reservation error:', error)
       alert(error instanceof Error ? error.message : 'Failed to create reservation')
     } finally {
-      setIsCreatingReservation(false)
+      // setIsCreatingReservation(false) // Removed from here
     }
-  }
-
-  if (confirmation) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Header restaurantName={resolvedParams.subdomain} />
-
-        <div className="max-w-md mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="mb-6">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {rescheduleId ? 'Reservation Rescheduled!' : 'Reservation Confirmed!'}
-              </h1>
-              <p className="text-gray-600 mt-2">Your table has been successfully booked.</p>
-            </div>
-            
-            <div className="border border-orange-200 rounded-md p-5 mb-6">
-              <h2 className="font-semibold text-gray-900 mb-4">Reservation Details</h2>
-              <div className="space-y-3 text-left">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Confirmation ID</span>
-                  <span className="font-medium">#{confirmation.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Restaurant</span>
-                  <span className="font-medium capitalize">{confirmation.restaurantName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Table</span>
-                  <span className="font-medium">{confirmation.tableName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Date</span>
-                  <span className="font-medium">{new Date(confirmation.date + 'T00:00:00').toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Time</span>
-                  <span className="font-medium">{confirmation.time}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Guests</span>
-                  <span className="font-medium">{confirmation.partySize}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Name</span>
-                  <span className="font-medium">{confirmation.guestName}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <button
-                onClick={() => router.push(`/${resolvedParams.subdomain}/reservation/${confirmation.id}`)}
-                className="w-full py-3 bg-orange-500 text-white rounded-md font-medium hover:bg-orange-600 transition-colors"
-              >
-                View Reservation
-              </button>
-              <button
-                onClick={() => router.push(`/${resolvedParams.subdomain}`)}
-                className="w-full py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-colors"
-              >
-                Back to Home
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (
