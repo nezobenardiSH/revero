@@ -35,7 +35,7 @@ export default function BookingFormNew({ onReservationSubmit, isLoading }: Booki
   const router = useRouter()
   const [formData, setFormData] = useState<BookingFormData>({
     date: '',
-    time: '12:00 PM',
+    time: '',
     partySize: 2,
     name: '',
     email: '',
@@ -49,6 +49,7 @@ export default function BookingFormNew({ onReservationSubmit, isLoading }: Booki
   const [showTableModal, setShowTableModal] = useState(false)
   const [selectedTableDetails, setSelectedTableDetails] = useState<TableDetails | null>(null)
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map')
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
 
   const handleInputChange = (field: keyof BookingFormData, value: any) => {
     setFormData({ ...formData, [field]: value })
@@ -229,13 +230,74 @@ export default function BookingFormNew({ onReservationSubmit, isLoading }: Booki
     router.back()
   }
 
-  const timeSlots = ['11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM']
+  // Generate available time slots based on selected date
+  useEffect(() => {
+    const allSlots = [
+      '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+      '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
+      '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM',
+      '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM',
+      '9:00 PM', '9:30 PM', '10:00 PM'
+    ]
+    
+    if (!formData.date) {
+      setAvailableTimeSlots(allSlots)
+      if (!formData.time) {
+        setFormData(prev => ({ ...prev, time: allSlots[0] }))
+      }
+      return
+    }
+    
+    // Check if selected date is today
+    const today = new Date()
+    const selectedDate = new Date(formData.date + 'T00:00:00')
+    
+    if (selectedDate.getDate() === today.getDate() &&
+        selectedDate.getMonth() === today.getMonth() &&
+        selectedDate.getFullYear() === today.getFullYear()) {
+      // Filter out past time slots for today
+      const currentHour = today.getHours()
+      const currentMinutes = today.getMinutes()
+      
+      const filteredSlots = allSlots.filter(slot => {
+        const [time, period] = slot.split(' ')
+        const [hours, minutes] = time.split(':').map(Number)
+        let hour24 = hours
+        
+        if (period === 'PM' && hours !== 12) {
+          hour24 += 12
+        } else if (period === 'AM' && hours === 12) {
+          hour24 = 0
+        }
+        
+        // Add 30 minutes buffer for booking (can't book slot starting in next 30 mins)
+        const slotTime = hour24 * 60 + minutes
+        const currentTime = currentHour * 60 + currentMinutes + 30
+        
+        return slotTime >= currentTime
+      })
+      
+      setAvailableTimeSlots(filteredSlots)
+      
+      // If current time selection is invalid, reset to first available slot
+      if (filteredSlots.length > 0 && (!formData.time || !filteredSlots.includes(formData.time))) {
+        setFormData(prev => ({ ...prev, time: filteredSlots[0] }))
+      } else if (filteredSlots.length === 0) {
+        setFormData(prev => ({ ...prev, time: '' }))
+      }
+    } else {
+      setAvailableTimeSlots(allSlots)
+      if (!formData.time) {
+        setFormData(prev => ({ ...prev, time: allSlots[0] }))
+      }
+    }
+  }, [formData.date])
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col h-full">
       <h1 className="text-2xl font-bold mb-6">Make a reservation</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-[30%_70%] gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-[30%_70%] gap-8 items-start flex-1 pb-24">
         {/* Left Column - Party Details */}
         <div className="space-y-6">
           {/* Party Name */}
@@ -320,15 +382,23 @@ export default function BookingFormNew({ onReservationSubmit, isLoading }: Booki
           {/* Time */}
           <div>
             <label className="block text-sm text-gray-600 mb-2">Time to visit</label>
-            <select
-              value={formData.time}
-              onChange={(e) => handleInputChange('time', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              {timeSlots.map(time => (
-                <option key={time} value={time}>{time}</option>
-              ))}
-            </select>
+            {availableTimeSlots.length > 0 ? (
+              <select
+                value={formData.time}
+                onChange={(e) => handleInputChange('time', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={!formData.date}
+              >
+                {!formData.date && <option value="">Select date first</option>}
+                {availableTimeSlots.map(time => (
+                  <option key={time} value={time}>{time}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                {formData.date ? 'No available slots for today' : 'Select date first'}
+              </div>
+            )}
           </div>
 
           {/* Number of people */}
@@ -635,18 +705,22 @@ export default function BookingFormNew({ onReservationSubmit, isLoading }: Booki
         </div>
       )}
 
-      {/* Bottom Actions */}
-      <div className="flex justify-between items-center mt-8 pt-6 border-t">
-        <button onClick={handleCancel} className="text-gray-600 hover:text-gray-900">
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={!formData.date || !formData.time || !formData.tableId || !formData.name || !formData.email || isLoading}
-          className="px-8 py-3 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
-        >
-          {isLoading ? 'Processing...' : 'Continue'}
-        </button>
+      {/* Bottom Actions - Sticky */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-40">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            <button onClick={handleCancel} className="text-gray-600 hover:text-gray-900">
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!formData.date || !formData.time || !formData.tableId || !formData.name || !formData.email || isLoading}
+              className="px-8 py-3 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
+            >
+              {isLoading ? 'Processing...' : 'Continue'}
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

@@ -1,5 +1,4 @@
 {
-  "/[subdomain]/reservation/[id]/page": "app/[subdomain]/reservation/[id]/page.js",
-  "/[subdomain]/book/page": "app/[subdomain]/book/page.js",
-  "/[subdomain]/page": "app/[subdomain]/page.js"
+  "/page": "app/page.js",
+  "/[subdomain]/book/page": "app/[subdomain]/book/page.js"
 }

@@ -97,16 +97,17 @@ export default function BookPage({
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <Header restaurantName={resolvedParams.subdomain} />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
         <BookingFormNew 
           onReservationSubmit={handleReservationSubmit}
           isLoading={isCreatingReservation}
         />
-        <Footer />
       </div>
+      
+      <Footer />
     </div>
   )
 }
